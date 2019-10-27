@@ -48,7 +48,10 @@ function processHostlist(hostlist) {
 
         // Javascript runs asynchronously so the error is investigated and appended only after hosts got loaded in DOM
         if (isDown) {
+            // Add html to the top of the container because it's faulty and has to be displayed before all
             $("#peripheralsContainer").prepend(html);
+
+            // Call function to search the error
             searchError(hostname, domId);
         }else{
             // Append host div with status (if error or not) to the container
