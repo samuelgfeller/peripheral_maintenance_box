@@ -1,25 +1,25 @@
 :root {
-    --primary-color: #302AE6;
-    --secondary-color: #536390;
     --font-color: #424242;
     --bg-color: #fff;
-    --heading-color: #292922;
+    --error-bg-color: #ffcccf;
+    --error-line-color: #ff6d68;
 }
 
 [data-theme="dark"] {
-    --primary-color: #9A97F3;
-    --secondary-color: #818cab;
-    --font-color: #e1e1ff;
-    --bg-color: #161625;
-    --heading-color: #818cab;
+    --font-color: whitesmoke;
+    --bg-color: #272C3C;
+    --error-bg-color: #7c0000;
+    --error-line-color: #c0000a;
 }
 
+* {
+    font-family: rubik, sans-serif;
+}
 
 body {
     margin: 0;
     background: var(--bg-color);
     color: var(--font-color);
-
 }
 
 @font-face {
@@ -32,34 +32,23 @@ h1 {
 
 }
 
-
 .page {
     margin: 4%;
-    /*width: 94%;*/
-    /*height: 40px;*/
-    /*background: lightcyan;*/
-}
-#darkThemeImg{
-    width: 30px;
-}
-.test {
-    background: red;
-    width: 100%;
-    height: 20px;
 }
 
-.peripheral {
+#darkThemeImg{
+    width: 40px;
+}
+
+.peripheralDiv {
     width: 100%;
     position: relative;
-    /*display: flex;*/
-    /*align-items: center;*/
 }
 
 .peripheralName {
     font-size: 3em;
     max-width: 80%;
     display: inline-block;
-
 }
 
 .dot {
@@ -68,7 +57,6 @@ h1 {
     height: 35px;
     width: 35px;
     right: 30px;
-    /*float: right;*/
     position: absolute;
     background-color: limegreen;
     border-radius: 50%;
@@ -77,4 +65,12 @@ h1 {
 
 .red {
     background: red;
+}
+
+.errorMsg{
+    border: 1.5px solid var(--error-line-color);
+    padding: 10px;
+    border-radius: 8px;
+    background: var(--error-bg-color);
+    max-width: 80%;
 }
