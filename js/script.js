@@ -40,15 +40,19 @@ function processHostlist(hostlist) {
         // Declare variable which is the dom id of the host div
         let domId = 'host' + i;
 
-        // Append host div with status (if error or not) to the container
-        $("#peripheralsContainer").append('<div class="peripheralDiv" id="' + domId + '">' +
+        // Declare var which contains the host html
+        let html = '<div class="peripheralDiv" id="' + domId + '">' +
             '<h1 class="hostname">' + hostname + '</h1>' +
             '<span class="dot ' + errorClass + '"></span>' +
-            '</div>');
+            '</div>';
 
         // Javascript runs asynchronously so the error is investigated and appended only after hosts got loaded in DOM
         if (isDown) {
-            searchError(hostname,domId);
+            $("#peripheralsContainer").prepend(html);
+            searchError(hostname, domId);
+        }else{
+            // Append host div with status (if error or not) to the container
+            $("#peripheralsContainer").append(html);
         }
 
         // Add 1 to the value of i
@@ -62,8 +66,8 @@ function processHostlist(hostlist) {
  * finds the faulty one and appends the error message below
  * the host in DOM
  *
- * @param host
- * @param domId
+ * @param host string hostname
+ * @param domId string id of faulty host div
  */
 function searchError(host, domId) {
 
@@ -78,19 +82,19 @@ function searchError(host, domId) {
         $.each(servicelist, function (servicename, status) {
 
             // If the status of the service shows an error
-            if (error.includes(status)){
+            if (error.includes(status)) {
 
                 // Get information about the faulty service
-                let urlServiceInfo = baseUrl+'statusjson.cgi?query=service&hostname=' + encodeURIComponent(host) + '&servicedescription=' + encodeURIComponent(servicename);
+                let urlServiceInfo = baseUrl + 'statusjson.cgi?query=service&hostname=' + encodeURIComponent(host) + '&servicedescription=' + encodeURIComponent(servicename);
                 $.getJSON(urlServiceInfo, function (result) {
 
                     // Declare serviceInfo with the information about the service
                     let serviceInfo = result['data']['service'];
 
                     // Append the error message to the host div
-                    $('#'+domId).append(
+                    $('#' + domId).append(
                         '<p class="errorMsg">' +
-                        'Service <b>'+ serviceInfo['description'] + '</b> has following message: <b>'+serviceInfo['plugin_output']+'</b>'+
+                        'Service <b>' + serviceInfo['description'] + '</b> has following message: <b>' + serviceInfo['plugin_output'] + '</b>' +
                         '</p>'
                     );
                 });
