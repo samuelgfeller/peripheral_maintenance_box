@@ -6,10 +6,25 @@ let baseUrl = 'https://nagiosv1.rvo.one/nagios/cgi-bin/';
 
 let urlHostlist = baseUrl + 'statusjson.cgi?query=hostlist&formatoptions=enumerate';
 
-// Get list of hosts with their statuses
-$.getJSON(urlHostlist, function (result) {
-    processHostlist(result['data']['hostlist']);
-});
+// Call the function for the first time
+getHostlist();
+
+// Refresh the whole thing every 30 sec
+window.setInterval(function () {
+
+    // Empty the container to populate with refreshed data
+    $("#peripheralsContainer").empty();
+
+    // Call the function every 30 sec
+    getHostlist();
+}, 30000);
+
+function getHostlist(){
+    // Get list of hosts with their statuses
+    $.getJSON(urlHostlist, function (result) {
+        processHostlist(result['data']['hostlist']);
+    });
+}
 
 /**
  * Loop through hosts, append them to the DOM
@@ -48,12 +63,13 @@ function processHostlist(hostlist) {
 
         // Javascript runs asynchronously so the error is investigated and appended only after hosts got loaded in DOM
         if (isDown) {
+
             // Add html to the top of the container because it's faulty and has to be displayed before all
             $("#peripheralsContainer").prepend(html);
 
             // Call function to search the error
             searchError(hostname, domId);
-        }else{
+        } else {
             // Append host div with status (if error or not) to the container
             $("#peripheralsContainer").append(html);
         }
