@@ -12,7 +12,7 @@ let baseUrl = 'https://nagiosv1.rvo.one/nagios/cgi-bin/';
 let firstExecution = true;
 
 // Call the function for the first time
-getServiceAndHostList(true);
+getHostlist(true);
 
 // Refresh the whole thing every 30 sec
 window.setInterval(function () {
@@ -34,53 +34,52 @@ window.setInterval(function () {
 
     // Reset newStatusHash
     newStatusHash = '';
+
     // Call the function every 30 sec
-    getServiceAndHostList(statusChanged);
+    getHostlist(statusChanged);
 
 }, 30000);
 
 /**
- * Get servicelist form nagios and engage future execution
+ * Get hostlist form nagios and engage future execution
  *
  * @param statusChanged boolean true if the status have changed and though the dom elements have to be updated
  */
-function getServiceAndHostList(statusChanged) {
+function getHostlist(statusChanged) {
 
-    // Get list of hosts with their services
-    let urlServiceList = baseUrl + 'statusjson.cgi?query=servicelist&formatoptions=enumerate';
-    $.getJSON(urlServiceList, function (result) {
-        processServiceAndHostList(result['data']['servicelist'], statusChanged);
+    // Get list of hosts with their statuses
+    let urlHostlist = baseUrl + 'statusjson.cgi?query=hostlist&formatoptions=enumerate';
+    $.getJSON(urlHostlist, function (result) {
+        processHostlist(result['data']['hostlist'], firstExecution, statusChanged);
     });
-
 }
 
 /**
- * Loop through hosts, then to their serivces
- * append them to the DOM and check if they are faulty.
- * If its the case
+ * Loop through hosts, append them to the DOM
+ * and check if they are down. If its the case
  * searchError() function is called to investigate
  *
- * @param serviceAndHostList string
+ * @param hostlist string
  * @param statusChanged boolean true if the status have changed and though the dom elements have to be updated
  */
-function processServiceAndHostList(serviceAndHostList, statusChanged) {
-
+function processHostlist(hostlist, statusChanged) {
     // Declare i which is counted up and will be part of the hostId
     let i = 1;
 
     // Loop through all
-    $.each(serviceAndHostList, function (hostname, serviceList) {
+    $.each(hostlist, function (hostname, status) {
+        let isDown = true;
+        let errorClass = 'red';
 
-        let faultyServices = [];
-        let errorClass = '';
+        // Check if success array has the returned status which would mean that its not faulty
+        if (success.includes(status)) {
 
-        $.each(serviceList, function (serviceName, status) {
-            // Check if success array has the returned status which would mean that its not faulty
-            if (error.includes(status)) {
-                faultyServices.push(serviceName);
-                errorClass = 'red';
-            }
-        });
+            // isDown boolean is set to false because it's not an error
+            isDown = false;
+
+            // errorClass is set to an empty string because it's not an error
+            errorClass = '';
+        }
 
         // Declare variable which is the dom id of the host div
         let domId = 'host' + i;
@@ -92,7 +91,7 @@ function processServiceAndHostList(serviceAndHostList, statusChanged) {
             '</div>';
 
         // Javascript runs asynchronously so the error is investigated and appended only after hosts got loaded in DOM
-        if (faultyServices.length > 0) {
+        if (isDown) {
 
             // Add 1 to hash to say that its down
             // Added at first position because we prepend the element so it comes first at that time
@@ -103,9 +102,8 @@ function processServiceAndHostList(serviceAndHostList, statusChanged) {
                 // Add html to the top of the container because it's faulty and has to be displayed before all
                 $("#peripheralsContainer").prepend(html);
             }
-
             // Call function to search the error
-            searchError(hostname, faultyServices, domId, statusChanged);
+            searchError(hostname, domId, statusChanged);
         } else {
 
             // Add 0 to hash to say that its up
@@ -125,19 +123,29 @@ function processServiceAndHostList(serviceAndHostList, statusChanged) {
 }
 
 /**
- * If the at least one service is down, the error has to be
- * displayed. This function goes through all faulty services
- * from a host and appends the error message below
- * the host div in DOM
+ * If the host is down, the error has to be found
+ * This function goes through all services from a host,
+ * finds the faulty one and appends the error message below
+ * the host in DOM
  *
  * @param host string hostname
- * @param faultyServices
  * @param domId string id of faulty host div
  * @param statusChanged boolean true if the status have changed and though the dom elements have to be updated
  */
-function searchError(host, faultyServices, domId, statusChanged) {
+function searchError(host, domId, statusChanged) {
+
+    // Get service list of host containing error
+    let urlServiceList = baseUrl + 'statusjson.cgi?query=servicelist&formatoptions=enumerate&hostname=' + encodeURIComponent(host);
+    $.getJSON(urlServiceList, function (result) {
+
+        // Declare servicelist variable which is an array of services
+        let servicelist = result['data']['servicelist'][host];
+
         // Loop through all services of the host containing an error
-        $.each(faultyServices, function (key, serviceName) {
+        $.each(servicelist, function (servicename, status) {
+
+            // If the status of the service shows an error
+            if (error.includes(status)) {
 
                 // Status on all services also added to the hash because if faulty service changes the page
                 // has to be updated too. The faulty host status nr is prepended to the hash and here it's after
@@ -146,7 +154,7 @@ function searchError(host, faultyServices, domId, statusChanged) {
                 newStatusHash += '1';
 
                 // Get information about the faulty service
-                let urlServiceInfo = baseUrl + 'statusjson.cgi?query=service&hostname=' + encodeURIComponent(host) + '&servicedescription=' + encodeURIComponent(serviceName);
+                let urlServiceInfo = baseUrl + 'statusjson.cgi?query=service&hostname=' + encodeURIComponent(host) + '&servicedescription=' + encodeURIComponent(servicename);
                 $.getJSON(urlServiceInfo, function (result) {
 
                     // Declare serviceInfo with the information about the service
@@ -163,5 +171,11 @@ function searchError(host, faultyServices, domId, statusChanged) {
                         );
                     }
                 });
+
+            } else {
+                // Add 0 to say that service isn't faulty
+                newStatusHash += '0';
+            }
         });
+    });
 }
