@@ -8,8 +8,8 @@
 [data-theme="dark"] {
     --font-color: whitesmoke;
     --bg-color: #272C3C;
-    --error-bg-color: #7c0000;
-    --error-line-color: #c0000a;
+    --error-bg-color: #5a0000;
+    --error-line-color: #9b000a;
 }
 
 * {
@@ -29,7 +29,6 @@ body {
 
 h1 {
     font-family: rubik, sans-serif;
-
 }
 
 .page {

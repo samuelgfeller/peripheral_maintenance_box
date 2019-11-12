@@ -19,6 +19,11 @@
     display:none;
 }
 
+.theme-switch img{
+    width: calc(var(--slider-height) / 1.3);
+    position: absolute;
+}
+
 .slider {
     background-color: #ccc;
     bottom: 0;
@@ -34,13 +39,11 @@
     background-color: #fff;
     top: 50%;
     transform: translateY(-50%);
-    /*bottom: calc(var(--slider-height) / 6.5); !*4px*!*/
     content: "";
     height: calc(var(--slider-height) / 1.3); /* 26px */
     margin-left: 4px;
     margin-right: 4px;
     left: 0;
-    /*right: initial;*/
     position: absolute;
     transition: .4s;
     width: calc(var(--slider-height) / 1.3); /* 26px */

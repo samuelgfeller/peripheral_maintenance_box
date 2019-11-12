@@ -77,7 +77,10 @@ function processServiceAndHostList(serviceAndHostList, statusChanged) {
         $.each(serviceList, function (serviceName, status) {
             // Check if success array has the returned status which would mean that its not faulty
             if (error.includes(status)) {
+                // Add the faulty service to the array
                 faultyServices.push(serviceName);
+
+                // If one service is faulty the whole host should appear with a red dot
                 errorClass = 'red';
             }
         });
@@ -91,7 +94,7 @@ function processServiceAndHostList(serviceAndHostList, statusChanged) {
             '<span class="dot ' + errorClass + '"></span>' +
             '</div>';
 
-        // Javascript runs asynchronously so the error is investigated and appended only after hosts got loaded in DOM
+        // (Javascript runs asynchronously so the error is investigated and appended only after hosts got loaded in DOM)
         if (faultyServices.length > 0) {
 
             // Add 1 to hash to say that its down
@@ -136,32 +139,32 @@ function processServiceAndHostList(serviceAndHostList, statusChanged) {
  * @param statusChanged boolean true if the status have changed and though the dom elements have to be updated
  */
 function searchError(host, faultyServices, domId, statusChanged) {
-        // Loop through all services of the host containing an error
-        $.each(faultyServices, function (key, serviceName) {
+    // Loop through all services of the host containing an error
+    $.each(faultyServices, function (key, serviceName) {
 
-                // Status on all services also added to the hash because if faulty service changes the page
-                // has to be updated too. The faulty host status nr is prepended to the hash and here it's after
-                // This is not relevant since it will be the same logic in every execution and to find if something
-                // changed it does the job
-                newStatusHash += '1';
+        // Status on all services also added to the hash because if faulty service changes the page
+        // has to be updated too. The faulty host status nr is prepended to the hash and here it's after
+        // This is not relevant since it will be the same logic in every execution and to find if something
+        // changed it does the job
+        newStatusHash += '1';
 
-                // Get information about the faulty service
-                let urlServiceInfo = baseUrl + 'statusjson.cgi?query=service&hostname=' + encodeURIComponent(host) + '&servicedescription=' + encodeURIComponent(serviceName);
-                $.getJSON(urlServiceInfo, function (result) {
+        // Get information about the faulty service
+        let urlServiceInfo = baseUrl + 'statusjson.cgi?query=service&hostname=' + encodeURIComponent(host) + '&servicedescription=' + encodeURIComponent(serviceName);
+        $.getJSON(urlServiceInfo, function (result) {
 
-                    // Declare serviceInfo with the information about the service
-                    let serviceInfo = result['data']['service'];
+            // Declare serviceInfo with the information about the service
+            let serviceInfo = result['data']['service'];
 
-                    // If status changed
-                    if (statusChanged) {
+            // If status changed
+            if (statusChanged) {
 
-                        // Append the error message to the host div
-                        $('#' + domId).append(
-                            '<p class="errorMsg">' +
-                            'Service <b>' + serviceInfo['description'] + '</b> has following message: <b>' + serviceInfo['plugin_output'] + '</b>' +
-                            '</p>'
-                        );
-                    }
-                });
+                // Append the error message to the host div
+                $('#' + domId).append(
+                    '<p class="errorMsg">' +
+                    'Service <b>' + serviceInfo['description'] + '</b> has following message: <b>' + serviceInfo['plugin_output'] + '</b>' +
+                    '</p>'
+                );
+            }
         });
+    });
 }
